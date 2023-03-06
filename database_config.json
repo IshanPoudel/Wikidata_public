@@ -1,0 +1,8 @@
+{
+  "host": "localhost" ,
+  "user" : "root" ,
+  "password" : "rootroot",
+  "filepath" : "/idir-nfs/wikidata_unzipped/extracted"
+
+
+}
