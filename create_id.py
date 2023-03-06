@@ -15,7 +15,7 @@ db = mysql.connector.connect(host=data['host'],
 mycursor = db.cursor()
 
 #Table for direct_truth_triple in id form
-query = "create table direct_truth_triple_id as  select e.entity_id as subject_id , p.property_id as property_id , e2.entity_id as object_id  from direct_truth_triple dt JOIN properties p ON dt.property = p.property JOIN entities e ON e.entity = dt.entity JOIN entities e2 on e2.entity=dt.entity  "
+query = "create table direct_truth_triple_id as select e.entity_id as subject_id , p.property_id as property_id , e2.entity_id as object_id from direct_truth_triple dt JOIN entities e on e.entity=dt.entity JOIN properties p on dt.property=p.property JOIN entities e2 on e2.entity=dt.value"
 mycursor.execute(query)
 db.commit()
 
