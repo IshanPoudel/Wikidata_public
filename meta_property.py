@@ -21,11 +21,11 @@ mycursor = db.cursor()
 #just get everything from one file.
 
 file1 = open(data['filepath'], 'r')
-Lines = file1.readlines()
+
 
 query = 'INSERT INTO master_properties (property , edge , meta_property) VALUES (%s , %s , %s)'
 
-for line in Lines:
+for line in file1.readlines():
 
     x = re.search("^<http://www.wikidata.org/entity/P", line)
     # Parse it into three different.

@@ -13,6 +13,10 @@ in the direct_truth_triple table.
 
 '''
 
+
+# Get entity
+#if prop send to one
+#if prop/direct send it to different
 import re
 import mysql.connector
 
@@ -27,11 +31,12 @@ def store_statement_id():
     '''We index all unique statement nodes in a separate table'''
     
     mycursor.execute("INSERT INTO statement_entity_id ( statement_entity) SELECT DISTINCT statement_entity FROM entity_property_statement_triple")
+    db.commit()
 
 
 def store_entity_property_statement_triple(char):
 
-    ''' We link entities and theri properties with their statement nodes.
+    ''' We link entities and their properties with their statement nodes.
 
       <Q31><P1082><Q31-3CC82F14-06C3-4B4F-9512-695E4121A252> '''
 
@@ -63,11 +68,11 @@ def store_entity_property_statement_triple(char):
         except:
             print("Could not insert " + arr[0] + " " + arr[1] + " " + arr[2])
 
-        return True, arr
 
 
 
-    return False, arr
+
+
 
 
 
@@ -104,10 +109,10 @@ def store_direct_truths(char):
             except:
                 a=1
                 # print("Could not insert " + arr[0] + " " + arr[1] + " " + arr[2])
-            return True , arr
 
 
-    return False , arr
+
+
 
 
 
@@ -130,19 +135,18 @@ mycursor = db.cursor()
 
 # Read the file
 file1 = open(data['filepath'], 'r')
-Lines = file1.readlines()
+
 
 #have an array with only entity values . Values starting from Q[0-9]*
-Matched=[]
 
-for line in Lines:
+
+for line in file1.readlines():
     x = re.search("^<http://www.wikidata.org/entity/Q[0-9]*>", line)
+
     if x:
-        Matched.append(line)
+        store_entity_property_statement_triple(line)
+        store_direct_truths(line)
 
-
-for line in Matched:
-    test , arr = store_entity_property_statement_triple(line)
 
 
 store_statement_id()
@@ -150,9 +154,6 @@ store_statement_id()
 
 
 
-#Insert direct truths
-for line in Matched:
-    test , arr = store_direct_truths(line)
 
 
 

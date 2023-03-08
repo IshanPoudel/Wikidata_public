@@ -5,7 +5,7 @@ in a table called prop_statements_and_qualifiers_id.'''
 
 import re
 import mysql.connector
-
+import json
 
 
 def get_values( line):
@@ -150,7 +150,6 @@ def get_values( line):
 
     return False, arr
 
-import json
 
 
 f = open('database_config.json')
@@ -173,25 +172,23 @@ Lines = file1.readlines()
 
 
 #create files that match.
-Matched=[]
+
 for line in Lines:
     x = re.search("^<http://www.wikidata.org/entity/statement/q", line , flags=re.IGNORECASE)
     if x:
-        # print(x)
-        Matched.append(line)
+        test, arr = get_values(line)
+        if test:
+            # print(arr)
+            try:
+                mycursor.execute(query, (arr[0], arr[1], arr[2]))
+                db.commit()
 
 
-for line in Matched:
-    test , arr = get_values(line)
-    if test:
-        # print(arr)
-        try:
-            mycursor.execute(query, (arr[0], arr[1], arr[2]))
-            db.commit()
+            except Exception as e:
+                print(e)
 
 
-        except Exception as e:
-            print(e)
+
 
 
 
@@ -200,17 +197,7 @@ for line in Matched:
 
        # After you store everything , make a entity_statement_table with only property_qualifer.
 
-#After creating the table , you need to create two tables , one with only entites.
-#O
-# query = "create table property_and_qualifiers as select property from statement_triple WHERE property REGEXP '^prop/statement/P|^qualifier/P' "
-# mycursor.execute(query)
-# db.commit()
 
-# //from the property and qualifiers table ,join them with the property and qualifier using the if statement , first get the property and then qualifier.True
-
-# //create table property and qualifier (id auto increment , property/qialifer varchar(100) , property_name , property_id);
-# //first add all prop/statements.
-# // then add all qualifiers.
 
 # First add the two values in the statment_property_types.
 mycursor.execute("INSERT INTO statement_property_types(type) VALUES ('prop/statement')")

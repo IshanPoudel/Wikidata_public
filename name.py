@@ -43,55 +43,98 @@ db = mysql.connector.connect(host=data['host'],
 
 mycursor = db.cursor()
 
-property_query = "INSERT INTO properties (property , name , description) VALUES (%s , %s , %s )"
-entity_query = "INSERT INTO entities (entity , name , description) VALUES (%s , %s , %s)"
-# mycursor.execute("CREATE TABLE properties(property VARCHAR(30) , name VARCHAR(1000) )")
 
 
-# When working this on the original file , use filepath instead of prop+filepath
-file1 = open(data['filepath'], 'r')
-Lines = file1.readlines()
 
-file2= open(data['filepath'], 'r')
-Lines_2 = file2.readlines()
+mycursor.execute("CREATE TABLE entities_name_only(entity VARCHAR(30) , name VARCHAR(500) )")
+mycursor.execute("CREATE TABLE property_name_only(property VARCHAR(30) , name VARCHAR(500) )")
 
-def store_name(Lines , char):
-    for line in Lines:
-        x = re.search("<http://www.wikidata.org/entity/"+char+".*> <http://schema.org/name> .*@en .$", line)
 
-        if x:
+query_entity = "INSERT INTO entities_name_only(entity , name) VALUES(%s ,%s)"
+query_property = "INSERT INTO property_name_only(property , name) VALUES (%s , %s)"
+
+def store_entity_name(char):
+
+    file1 = open(data['filepath'], 'r')
+
+    for line in file1.readlines():
+
+        if re.search("<http://www.wikidata.org/entity/"+char+".*> <http://schema.org/name> .*@en .$", line):
             arr = line.split(">")
             identifier = re.split("/", arr[0], 4)[-1]
             name = arr[2][0:-6]  # to remove [0:-2]
-
-
-
-            for value in Lines:
-
-                search_pattern = "<http://www.wikidata.org/entity/" + identifier + "> <http://schema.org/description>.*@en .$"
-                y = re.search(search_pattern, value , re.IGNORECASE)
-                label = "NULL"
-                if y:
-                    label = re.split("/description> ", value, 1)[-1][0:-6]
-
-                    break
-
-            if char == 'P':
-                query = property_query
-            else:
-                query = entity_query
             try:
-                mycursor.execute(query, (identifier , name , label))
+                if char == "Q":
+                    mycursor.execute(query_entity, (identifier , name))
+                    # print(identifier , name)
+                else:
+                    mycursor.execute(query_property, (identifier, name))
+
+
                 db.commit()
 
             except Exception  as e:
                 print(e)
-
-store_name(Lines , "P" )
-store_name(Lines_2 , "Q" )
+    file1.close()
 
 
+store_entity_name("Q")
+print("Entity name done")
+store_entity_name("P")
+print("Property name done")
+
+# def store_entity_description(char):
+#     for line in file1.readlines():
+#         x = re.search("<http://www.wikidata.org/entity/P[0-9].> <http://schema.org/description>.*@en .$" , line , re.IGNORECASE)
+#         if x:
+
+
+
+# Create table for entity_description and property_description
+mycursor.execute("CREATE TABLE entities_dcp_only(entity VARCHAR(30) , description VARCHAR(500) )")
+mycursor.execute("CREATE TABLE property_dcp_only(property VARCHAR(30) , description VARCHAR(500) )")
+
+query_entity_d = "INSERT INTO entities_dcp_only(entity , description) VALUES(%s ,%s)"
+
+query_property_d = "INSERT INTO property_dcp_only(property , description) VALUES (%s , %s)"
+def store_entity_description():
+    # print("This file is called")
+    file1 = open(data['filepath'], 'r')
+    for line in file1.readlines():
+        x = re.search("<http://www.wikidata.org/entity/Q.*> <http://schema.org/description> .*@en .$" , line , re.IGNORECASE)
+        if x:
+            arr = line.split(">")
+            identifier = re.split("/", arr[0], 4)[-1]
+            #Get the description
+            label = re.split("/description> ", line, 1)[-1][0:-6]
+            mycursor.execute(query_entity_d , (identifier , label))
+            db.commit()
+
+    file1.close()
 
 
 
 
+def store_property_description():
+    # print("This file is called")
+    file1 = open(data['filepath'], 'r')
+    for line in file1.readlines():
+        x = re.search("<http://www.wikidata.org/entity/P.*> <http://schema.org/description> .*@en .$", line, re.IGNORECASE)
+        if x:
+            arr = line.split(">")
+            identifier = re.split("/", arr[0], 4)[-1]
+            # Get the description
+            label = re.split("/description> ", line, 1)[-1][0:-6]
+            mycursor.execute(query_property_d, (identifier, label))
+            db.commit()
+    file1.close()
+
+
+store_entity_description()
+print("Entity description done")
+store_property_description()
+print("Property description done")
+
+mycursor.execute("INSERT INTO entities (entity , name , description) select en.entity , en.name , ed.description from entities_name_only en JOIN entities_dcp_only ed ON en.entity=ed.entity")
+mycursor.execute("INSERT INTO properties (property , name , description) select pn.property , pn.name , pd.description from property_name_only pn JOIN property_dcp_only pd ON pn.property=pd.property")
+db.commit()

@@ -1,8 +1,8 @@
 {
-  "host": "localhost" ,
+  "host": "idir-server8" ,
   "user" : "ishan" ,
   "password" : "idirishan",
-  "filepath" : "/idir-nfs/wikidata_unzipped/extracted"
+  "filepath" : "/idir-nfs/wikidata_unzipped/extracted.nt"
 
 
 }

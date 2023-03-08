@@ -22,10 +22,11 @@ mycursor = db.cursor()
 mycursor.execute("DROP database if exists wikidata ")
 mycursor.execute("CREATE database wikidata")
 
-db = mysql.connector.connect(host="localhost",
-                             user="root",
-                             passwd="rootroot",
+db = mysql.connector.connect(host=data['host'],
+                             user=data['user'],
+                             passwd=data['password'],
                              database="wikidata")
+
 
 mycursor = db.cursor()
 

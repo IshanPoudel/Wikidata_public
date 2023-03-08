@@ -71,10 +71,10 @@ def store_value_nodes(line):
 
 
 file1 = open(data['filepath'], 'r')
-Lines = file1.readlines()
 
 
-for line in Lines:
+
+for line in file1.readlines():
     x = re.search("^<http://www.wikidata.org/value/" , line)
     # we get only values that are wikidata entities
     arr=[]
